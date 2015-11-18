@@ -69,11 +69,11 @@ img {
 
 <div id="overview" class="section level1">
 <h1>Overview</h1>
-<p>Goal of this project is to predict manner of performing barbell lifts exercise using data from accelerometers on the belt, forearm, arm, and dumbell. Data for model building is taken from <a href="mailto:Groupware@LES">Groupware@LES</a> (<a href="http://groupware.les.inf.puc-rio.br/har" class="uri">http://groupware.les.inf.puc-rio.br/har</a>) and consists of records on performing this exercise in 5 different manners by 6 participants. Data is splitted into train and test datasets, this project uses only training part to build a model.</p>
+<p>Goal of this project is to predict manner of performing barbell lifts exercise using data from accelerometers on the belt, forearm, arm, and dumbell. Data for model building is taken from <a href="mailto:Groupware@LES">Groupware@LES</a> (<a href="http://groupware.les.inf.puc-rio.br/har" class="uri">http://groupware.les.inf.puc-rio.br/har</a>) and consists of records on performing this exercise in 5 different manners by 6 participants. Data is splitted into train and test datasets, this project uses only training part to build a model. Final model is build with random forest method. It has accuracy 99.7% and out of sample error rate is estimated to be 0.06%.</p>
 </div>
 <div id="cleaning-data" class="section level1">
 <h1>Cleaning data</h1>
-<p>Dataset consists of 19622 observations of 160 variables. Lots of observation has missing values which are not useful for model building and predictions. We need to eliminate variables which has no data but only has values NA, “”, “#DIV/0!”. Also first column ‘X’ represents number of observation and not related to manner of doing exercise, it will be removed from dataset for modelling.</p>
+<p>Dataset consists of 19622 observations of 160 variables. Lots of observations have missing values which are not useful for model building and predictions. We need to eliminate variables which has no data but only has values NA, “”, “#DIV/0!”. Also first column ‘X’ represents number of observations and not related to manner of doing exercise, it will be removed from dataset for modelling.</p>
 <pre class="r"><code>dataTrain&lt;-read.csv(&quot;./pml-training.csv&quot;)
 notNA&lt;-colSums(is.na(dataTrain) | dataTrain==&quot;#DIV/0!&quot; | dataTrain==&quot;&quot;)==0
 notNA[1]&lt;-0
@@ -85,12 +85,9 @@ dim(cleanData)</code></pre>
 </div>
 <div id="buildind-machine-learning-algorithm" class="section level1">
 <h1>Buildind machine learning algorithm</h1>
-<pre class="r"><code>library(caret)</code></pre>
-<pre><code>## Loading required package: lattice
-## Loading required package: ggplot2</code></pre>
 <div id="splitting-training-data-into-train-and-test-datasets" class="section level2">
 <h2>Splitting training data into train and test datasets</h2>
-<p>To avoid overfitting and to estimate out of sample error cleaned training data will be splitted into train and test parts (60%/40% respectively).</p>
+<p>To avoid overfitting and to estimate out of sample error cleaned training data will be splitted into train and test parts (60%/40% respectively). Train part will be used to train model and test part only to test this model.</p>
 <pre class="r"><code>inTrain&lt;-createDataPartition(y=cleanData$classe, p=0.6, list=F)
 training&lt;-cleanData[inTrain,]
 testing&lt;-cleanData[-inTrain,]</code></pre>
@@ -135,12 +132,13 @@ model$finalModel</code></pre>
 ## 
 ## Accuracy was used to select the optimal model using  the largest value.
 ## The final value used for the model was mtry = 41.</code></pre>
-<p>As we can see, in sample error is very small, accuracy is 99.7%. Model could be overfitted, to check this, model will be tested on testing dataset, which was splitted and left out before. ##Testing prediction, out of sample error</p>
+<p>As we can see, in sample error is very small, accuracy is 99.7%. Model could be overfitted, to check this, model will be tested on testing dataset, which was splitted and left out before.</p>
+</div>
+<div id="testing-prediction-out-of-sample-error" class="section level2">
+<h2>Testing prediction, out of sample error</h2>
 <pre class="r"><code>pred&lt;-predict(model,testing)
-cm&lt;-table(pred,testing$classe)
-print(&quot;Confusion matrix for testing dataset:&quot;)</code></pre>
-<pre><code>## [1] &quot;Confusion matrix for testing dataset:&quot;</code></pre>
-<pre class="r"><code>cm</code></pre>
+cm&lt;-table(pred,testing$classe)</code></pre>
+<p>Confusion matrix for testing dataset:</p>
 <pre><code>##     
 ## pred    A    B    C    D    E
 ##    A 2232    1    0    0    0
@@ -148,10 +146,9 @@ print(&quot;Confusion matrix for testing dataset:&quot;)</code></pre>
 ##    C    0    0 1366    2    0
 ##    D    0    0    0 1284    0
 ##    E    0    0    0    0 1442</code></pre>
+<p>Out of sample error estimate:</p>
 <pre class="r"><code>oos&lt;-(sum(cm)-sum(diag(cm)))/sum(cm)
-print(&quot;Out of sample error estimate:&quot;)</code></pre>
-<pre><code>## [1] &quot;Out of sample error estimate:&quot;</code></pre>
-<pre class="r"><code>oos</code></pre>
+oos</code></pre>
 <pre><code>## [1] 0.0006372674</code></pre>
 <p>Our estimate of OOS error is very small, which makes feel confident about chosen model.</p>
 </div>

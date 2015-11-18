@@ -10,10 +10,11 @@ setwd("D:\\DataScientist\\MachineLearning\\CP")
 ```
 # Overview
 Goal of this project is to predict manner of performing barbell lifts exercise using data from accelerometers on the belt, forearm, arm, and dumbell. Data for model building is taken from Groupware@LES (http://groupware.les.inf.puc-rio.br/har) and consists of records on performing this exercise in 5 different manners by 6 participants. Data is splitted into train and test datasets, this project uses only training part to  build a model.
+Final model is build with random forest method. It has accuracy 99.7% and out of sample error rate is estimated to be 0.06%.
 
 # Cleaning data
 
-Dataset consists of 19622 observations of 160 variables. Lots of observation has missing values which are not useful for model building and predictions. We need to eliminate variables which has no data but only has values NA, "", "#DIV/0!". Also first column 'X' represents number of observation and not related to manner of doing exercise, it will be removed from dataset for modelling.
+Dataset consists of 19622 observations of 160 variables. Lots of observations have missing values which are not useful for model building and predictions. We need to eliminate variables which has no data but only has values NA, "", "#DIV/0!". Also first column 'X' represents number of observations and not related to manner of doing exercise, it will be removed from dataset for modelling.
 
 ```{r data,echo=TRUE}
 dataTrain<-read.csv("./pml-training.csv")
@@ -27,11 +28,11 @@ New dataset has only 59 variables.
 
 # Buildind machine learning algorithm
 
-```{r ml,echo=TRUE}
+```{r ml,echo=FALSE,message=FALSE}
 library(caret)
 ```
 ## Splitting training data into train and test datasets
-To avoid overfitting and to estimate out of sample error cleaned training data will be splitted into train and test parts (60%/40% respectively).
+To avoid overfitting and to estimate out of sample error cleaned training data will be splitted into train and test parts (60%/40% respectively). Train part will be used to train model and test part only to test this model.
 ```{r cross,echo=TRUE}
 inTrain<-createDataPartition(y=cleanData$classe, p=0.6, list=F)
 training<-cleanData[inTrain,]
@@ -48,15 +49,20 @@ model$finalModel
 model
 ```
 As we can see, in sample error is very small, accuracy is 99.7%. Model could be overfitted, to check this, model will be tested on testing dataset, which was splitted and left out before.
+
 ##Testing prediction, out of sample error
 
-```{r pred,echo=TRUE}
+```{r pred,echo=TRUE,message=FALSE}
 pred<-predict(model,testing)
 cm<-table(pred,testing$classe)
-print("Confusion matrix for testing dataset:")
+```
+Confusion matrix for testing dataset:
+```{r pred2,echo=FALSE}
 cm
+```
+Out of sample error estimate:
+```{r oos,echo=TRUE}
 oos<-(sum(cm)-sum(diag(cm)))/sum(cm)
-print("Out of sample error estimate:")
 oos
 ```
 Our estimate of OOS error is very small, which makes feel confident about chosen model.
